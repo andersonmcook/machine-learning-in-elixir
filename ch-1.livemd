@@ -27,10 +27,16 @@ columns = ~w(petal_length petal_width sepal_length sepal_width)
 
 iris =
   iris
+  # Ensure input features operate on a common scale, i.e. standardize
+  # `across`, `mean`, and `variance` are not imported here. They are from the `mutate` macro
   |> DF.mutate(Enum.map(across(^columns), &{&1.name, (&1 - mean(&1)) / variance(&1)}))
+  # `species` is from the `mutate` macro
+  # `species` is a categorical feature with no notion of scale, nothing to standardize
   |> DF.mutate(species: Explorer.Series.cast(species, :category))
+  # Shuffle so we don't train or test on the same data every time
   |> DF.shuffle()
 
+# Split dataframe into training and testing sets
 # Can we use `sample` here?
 # https://hexdocs.pm/explorer/Explorer.DataFrame.html#sample/3
 train_df = DF.slice(iris, 0..119)
@@ -42,10 +48,10 @@ test_df = DF.slice(iris, 120..149)
 ```elixir
 # `stack` converts it to a tensor
 
-# Q: Why axis -1?
+# Why axis -1?
 x_train = Nx.stack(train_df[columns], axis: -1)
 
-# Q: Why `iota` with these values?
+# Why `iota` with these values?
 y_train =
   train_df["species"]
   |> Nx.stack(axis: -1)
@@ -65,7 +71,9 @@ y_test =
 # Shape represents the values of each dimension
 model =
   "iris_features"
+  # Why this particular shape?
   |> Axon.input(shape: {nil, 4})
+  # Why these values?
   |> Axon.dense(3, activation: :softmax)
 ```
 
