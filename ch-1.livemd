@@ -7,7 +7,8 @@ Mix.install([
   {:axon, "~> 0.5"},
   {:nx, "~> 0.5"},
   {:explorer, "~> 0.5"},
-  {:kino, "~> 0.8"}
+  {:kino, "~> 0.8"},
+  {:kino_explorer, "~> 0.1"}
 ])
 ```
 
@@ -49,12 +50,15 @@ test_df = DF.slice(iris, 120..149)
 # `stack` converts it to a tensor
 
 # Why axis -1?
+# Grab the last column and turn it into a row
 x_train = Nx.stack(train_df[columns], axis: -1)
 
 # Why `iota` with these values?
+# 1x3 shaped tensor
 y_train =
   train_df["species"]
   |> Nx.stack(axis: -1)
+  # One-hot encode the field
   |> Nx.equal(Nx.iota({1, 3}, axis: -1))
 
 x_test = Nx.stack(test_df[columns], axis: -1)
@@ -69,11 +73,19 @@ y_test =
 
 ```elixir
 # Shape represents the values of each dimension
+# Create an input layer named "iris_features"
 model =
   "iris_features"
   # Why this particular shape?
+  # Accept a tensor  of 4 values in each row
+  # `nil` because it's 1 dimensional
   |> Axon.input(shape: {nil, 4})
   # Why these values?
+  # 3 neurons to encode this data
+  # Dense layer because it's fully connected. Also called a linear layer.
+  # Each neuron is connected to all other neurons in the next layer
+  # The output is probabilities
+  # Softmax is used more for classification and less for regression
   |> Axon.dense(3, activation: :softmax)
 ```
 
@@ -94,6 +106,7 @@ trained_model =
   model
   |> Axon.Loop.trainer(:categorical_cross_entropy, :sgd)
   |> Axon.Loop.metric(:accuracy)
+  # Can pass in the trained model as the initial state to progressively train it.
   |> Axon.Loop.run(Stream.repeatedly(fn -> {x_train, y_train} end), %{},
     iterations: 500,
     epochs: 10
