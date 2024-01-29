@@ -1,0 +1,44 @@
+<!-- livebook:{"autosave_interval_s":60} -->
+
+# Chapter 2
+
+```elixir
+Mix.install([
+  {:nx, "~> 0.5"},
+  {:exla, "~> 0.5"},
+  {:benchee, github: "bencheeorg/benchee", override: true}
+])
+```
+
+## Understanding Nx Tensors
+
+Tensors have a type, shape, and data.
+
+### Type
+
+Selecting a type with incorrect precision can cause underflow or overflow. Tensors must have a homogenous type.
+
+* signed integer
+  * `8`, `16`, `32`, `64`
+* unsigned integer
+  * `8`, `16`, `32`, `64`
+* float
+  * `16`, `32`, `64`
+* brain float
+  * `16`
+* complex
+  * `64`, `128`
+
+### Shape
+
+Tensor data is not stored as a list. Its shape is the size of each dimension.
+
+* 1x2 - `[1, 2]`
+* 2x2 - `[[1, 2], [3, 4]]`
+* 2x2x2 - `[[[1, 2], [3, 4]], [[5, 6], [7, 8]]]`
+
+Another name for the number of dimensions is "rank".
+
+```elixir
+
+```
