@@ -124,3 +124,31 @@ profits_derivative = BerryFarm.profits_derivative(trees)
   |> V.encode(:color, value: "#ff0000")
 ])
 ```
+
+## Differentiation
+
+```elixir
+defmodule GradFun do
+  import Nx.Defn
+
+  defn my_function(x) do
+    x
+    |> Nx.cos()
+    |> Nx.exp()
+    |> Nx.sum()
+    |> print_expr(label: "my_function")
+  end
+
+  # Gradients are the direction of steepest change for scalar functions
+  # Must return a floating-point type
+  defn grad_my_function(x) do
+    x
+    |> grad(&my_function/1)
+    |> print_expr(label: "grad_my_function")
+  end
+end
+```
+
+```elixir
+GradFun.grad_my_function(Nx.tensor([1.0, 2.0, 3.0]))
+```
